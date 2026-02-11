@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bitcoin PSBT Builder</title>
+  <style>
+    :root {
+      --bg: #0b1016;
+      --bg-2: #121923;
+      --panel: #161f2a;
+      --panel-2: #1b2733;
+      --line: #2b3948;
+      --line-2: #3c4d5f;
+      --text: #e6edf5;
+      --muted: #9dafc4;
+      --accent: #33b1ff;
+      --accent-2: #1b95e0;
+      --danger: #e36a76;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 1rem;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 0% 0%, #1a2d40 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #102a3d 0%, transparent 50%),
+        var(--bg);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .app-shell {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: end;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(21, 30, 41, 0.9);
+    }
+
+    .title-wrap h1 {
+      font-size: 1.7rem;
+      letter-spacing: 0.01em;
+    }
+
+    .title-wrap p {
+      margin-top: 0.25rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .title-actions {
+      margin-top: 0.6rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .top-action {
+      width: auto;
+      margin: 0;
+      padding: 0.5rem 0.72rem;
+      border-style: dashed;
+      border-color: #4a627b;
+      background: rgba(46, 67, 90, 0.35);
+      color: #c8d9ec;
+      white-space: nowrap;
+    }
+
+    .network-wrap {
+      min-width: 220px;
+      max-width: 280px;
+      width: 100%;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      width: 100%;
+      margin-top: 0.42rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 0.6rem 0.72rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #8194ab;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus,
+    button:focus-visible {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(51, 177, 255, 0.23);
+    }
+
+    input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 130px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      border-color: var(--line-2);
+      background: linear-gradient(180deg, #314353 0%, #273544 100%);
+    }
+
+    button:hover {
+      border-color: #57718a;
+      background: linear-gradient(180deg, #3a4f62 0%, #2d3e50 100%);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(380px, 1fr);
+      gap: 0.9rem;
+      align-items: start;
+    }
+
+    .left-column,
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      min-width: 0;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(22, 31, 42, 0.9);
+      padding: 0.95rem;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.7rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .card-head h2 {
+      font-size: 1.07rem;
+      font-weight: 620;
+    }
+
+    .head-action {
+      width: auto;
+      margin: 0;
+      padding: 0.5rem 0.72rem;
+      border-style: dashed;
+      border-color: #4a627b;
+      background: rgba(46, 67, 90, 0.35);
+      color: #c8d9ec;
+      white-space: nowrap;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .row {
+      display: flex;
+      gap: 0.55rem;
+      width: 100%;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+
+    .row input,
+    .row button {
+      width: auto;
+      margin-top: 0;
+    }
+
+    .row .grow {
+      flex: 1 1 280px;
+      min-width: 0;
+    }
+
+    button.remove {
+      width: 44px;
+      min-width: 44px;
+      flex: 0 0 44px;
+      margin-top: 0;
+      padding: 0.52rem 0;
+      border-radius: 9px;
+      line-height: 1;
+      font-size: 1rem;
+      border-color: #70444f;
+      background: linear-gradient(180deg, #603a45 0%, #492c35 100%);
+    }
+
+    button.remove:hover {
+      background: linear-gradient(180deg, #71444f 0%, #53323c 100%);
+    }
+
+    .script-label {
+      margin-top: 0.22rem;
+      color: var(--muted) !important;
+      font-size: 0.84rem;
+    }
+
+    .action-row {
+      margin-top: 0.2rem;
+      display: flex;
+      gap: 0.55rem;
+    }
+
+    .option-line {
+      margin-top: 0.65rem;
+      padding: 0.48rem 0.6rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(31, 43, 57, 0.62);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .option-line label {
+      margin: 0;
+      color: #c6d6e8;
+      cursor: pointer;
+    }
+
+    #opReturnGroup {
+      margin-top: 0.62rem;
+    }
+
+    .hint {
+      margin-top: 0.28rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    #opReturnByteStatus {
+      margin-top: 0.38rem;
+      font-size: 0.82rem;
+      color: #9ec0df;
+    }
+
+    #opReturnByteStatus.error {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    #opReturnMessage.error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(227, 106, 118, 0.18);
+    }
+
+    #createPsbt {
+      flex: 1;
+      margin: 0;
+      border-color: #2493d8;
+      background: linear-gradient(180deg, #1779ba 0%, #0e639d 100%);
+    }
+
+    #createPsbt:hover {
+      background: linear-gradient(180deg, #1e8acf 0%, #116fb1 100%);
+    }
+
+    #createPsbt,
+    #clearButton {
+      min-height: 42px;
+    }
+
+    .hidden-config {
+      display: none;
+    }
+
+    #clearButton,
+    #copyPsbtButton,
+    #downloadPsbtButton {
+      width: auto;
+      margin: 0;
+      padding: 0.52rem 0.9rem;
+    }
+
+    #balanceTracker {
+      background: rgba(20, 30, 40, 0.95);
+    }
+
+    .summary-title {
+      margin-bottom: 0.55rem;
+      font-size: 0.95rem;
+      color: #dce9f6;
+      font-weight: 700;
+    }
+
+    .summary-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.34rem;
+      font-size: 0.92rem;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.9rem;
+    }
+
+    .summary-row strong {
+      font-weight: 700;
+    }
+
+    .summary-row.total {
+      margin-top: 0.16rem;
+      padding-top: 0.38rem;
+      border-top: 1px solid var(--line);
+    }
+
+    #availableBalance {
+      color: var(--accent);
+    }
+
+    #feeCalc {
+      min-height: 1.1rem;
+      color: #c4d4e7;
+      font-size: 0.9rem;
+    }
+
+    #psbtDisplay {
+      margin-top: 0.9rem;
+      background: rgba(18, 27, 37, 0.94);
+    }
+
+    #importTxSection {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(22, 31, 42, 0.9);
+      padding: 0.95rem;
+    }
+
+    #importTxHex {
+      min-height: 220px;
+    }
+
+    .import-actions {
+      margin-top: 0.6rem;
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    #loadTxHexButton,
+    #closeImportTxButton {
+      width: auto;
+      margin: 0;
+      padding: 0.52rem 0.9rem;
+    }
+
+    #importTxStatus {
+      margin-top: 0.55rem;
+      font-size: 0.87rem;
+      color: #c4d4e7;
+      min-height: 1.2rem;
+      white-space: pre-wrap;
+    }
+
+    #importTxStatus.error {
+      color: var(--danger);
+    }
+
+    #psbtBase64 {
+      min-height: 260px;
+      width: 100%;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .result-actions {
+      margin-top: 0.55rem;
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 1050px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .network-wrap {
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 0.8rem;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .action-row,
+      .result-actions,
+      .import-actions {
+        flex-direction: column;
+      }
+
+      #clearButton,
+      #copyPsbtButton,
+      #downloadPsbtButton,
+      #loadTxHexButton,
+      #closeImportTxButton {
+        width: 100%;
+      }
+
+      .row {
+        flex-wrap: wrap;
+      }
+
+      .row .grow {
+        flex-basis: 100%;
+      }
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/index-D67_B9LT.js"></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="title-wrap">
+        <h1>Bitcoin PSBT Builder</h1>
+        <p>Build unsigned PSBTs with a side-by-side workflow.</p>
+        <div class="title-actions">
+          <button type="button" id="importTxToggleButton" class="top-action">Import Transaction Hex</button>
+        </div>
+      </div>
+      <div class="network-wrap">
+        <label for="network">Network</label>
+        <select id="network">
+          <option value="mainnet">Mainnet</option>
+          <option value="testnet">Testnet</option>
+        </select>
+      </div>
+    </header>
+
+    <section id="importTxSection">
+      <label for="importTxHex">Transaction Hex</label>
+      <textarea id="importTxHex" placeholder="Paste raw transaction hex"></textarea>
+      <div class="import-actions">
+        <button type="button" id="loadTxHexButton">Load</button>
+        <button type="button" id="closeImportTxButton">Close</button>
+      </div>
+      <div id="importTxStatus"></div>
+    </section>
+
+    <section class="workspace">
+      <div class="left-column">
+        <section class="card">
+          <div class="card-head">
+            <h2>Inputs (UTXOs)</h2>
+            <button type="button" id="addInputButton" class="head-action">+ Add Input</button>
+          </div>
+          <div id="utxoContainer" class="stack"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Outputs</h2>
+            <button type="button" id="addOutputButton" class="head-action">+ Add Output</button>
+          </div>
+          <div id="outputContainer" class="stack"></div>
+        </section>
+      </div>
+
+      <aside class="right-column">
+        <section class="card">
+          <div class="card-head">
+            <h2>Build</h2>
+          </div>
+
+          <div class="action-row">
+            <button id="createPsbt">Create PSBT</button>
+            <button id="clearButton">Clear</button>
+          </div>
+
+          <div class="option-line">
+            <input type="checkbox" id="includeOpReturn">
+            <label for="includeOpReturn">Add OP_RETURN message</label>
+          </div>
+
+          <div id="opReturnGroup" style="display:none;">
+            <label for="opReturnMessage">OP_RETURN Message (text only)</label>
+            <input type="text" id="opReturnMessage" placeholder="Enter text message">
+            <div class="hint">Maximum 83 bytes. Hex input is disabled.</div>
+            <div id="opReturnByteStatus">0 / 83 bytes</div>
+          </div>
+
+          <div class="hidden-config" aria-hidden="true">
+            <input type="checkbox" id="includeChange" disabled>
+            <div id="feeRateGroup"><input type="number" id="feeRate" step="any" min="0" inputmode="decimal"></div>
+            <div id="changeAddrGroup"><input type="text" id="changeAddress"></div>
+          </div>
+        </section>
+
+        <section id="balanceTracker" class="card">
+          <div class="summary-title">Balance Summary</div>
+          <div class="summary-grid">
+            <div class="summary-row">
+              <span>Total Inputs:</span>
+              <strong id="totalInputs">0 BTC</strong>
+            </div>
+            <div class="summary-row">
+              <span>Total Outputs:</span>
+              <strong id="totalOutputs">0 BTC</strong>
+            </div>
+            <div class="summary-row total">
+              <span>Fee:</span>
+              <strong id="feeAmount">0 BTC</strong>
+            </div>
+            <strong id="availableBalance" style="display:none;">0 BTC</strong>
+          </div>
+        </section>
+
+        <section class="card">
+          <div id="feeCalc" style="display:none;"></div>
+        </section>
+
+      </aside>
+    </section>
+    <section id="psbtDisplay" class="card" style="display: none;">
+      <label for="psbtBase64">PSBT (Base64) - Copy this to your wallet</label>
+      <textarea id="psbtBase64" readonly rows="12"></textarea>
+      <div class="result-actions">
+        <button id="copyPsbtButton">Copy to Clipboard</button>
+        <button id="downloadPsbtButton">Download PSBT File</button>
+      </div>
+    </section>
+  </main>
+  <script>
+    (function () {
+      const maxBytes = 83;
+      const includeOpReturn = document.getElementById("includeOpReturn");
+      const opReturnMessage = document.getElementById("opReturnMessage");
+      const byteStatus = document.getElementById("opReturnByteStatus");
+      const createPsbtButton = document.getElementById("createPsbt");
+      const utf8Encoder = new TextEncoder();
+
+      function getByteState(value) {
+        if (/^0x/i.test(value)) {
+          return { bytes: 0, error: "Hex input disabled. Enter plain text." };
+        }
+        return { bytes: utf8Encoder.encode(value).length, error: "" };
+      }
+
+      function updateOpReturnState() {
+        const isEnabled = includeOpReturn.checked;
+        const value = opReturnMessage.value.trim();
+        const state = getByteState(value);
+        const tooLarge = state.bytes > maxBytes;
+        const hasError = isEnabled && (tooLarge || !!state.error);
+
+        if (!isEnabled) {
+          byteStatus.textContent = "0 / 83 bytes";
+          byteStatus.classList.remove("error");
+          opReturnMessage.classList.remove("error");
+          createPsbtButton.disabled = false;
+          return;
+        }
+
+        if (state.error) {
+          byteStatus.textContent = state.error + " (0 / 83 bytes)";
+        } else if (tooLarge) {
+          byteStatus.textContent = state.bytes + " / 83 bytes (exceeds limit)";
+        } else {
+          byteStatus.textContent = state.bytes + " / 83 bytes";
+        }
+
+        byteStatus.classList.toggle("error", hasError);
+        opReturnMessage.classList.toggle("error", hasError);
+        createPsbtButton.disabled = hasError;
+      }
+
+      includeOpReturn.addEventListener("change", updateOpReturnState);
+      opReturnMessage.addEventListener("input", updateOpReturnState);
+      document.getElementById("clearButton").addEventListener("click", function () {
+        setTimeout(updateOpReturnState, 0);
+      });
+      updateOpReturnState();
+    })();
+  </script>
+</body>
+</html>
