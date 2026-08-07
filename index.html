@@ -302,11 +302,13 @@
       color: #9ec0df;
     }
 
+    #opReturnByteStatus.warning,
     #opReturnByteStatus.error {
       color: var(--danger);
       font-weight: 600;
     }
 
+    #opReturnMessage.warning,
     #opReturnMessage.error {
       border-color: var(--danger);
       box-shadow: 0 0 0 3px rgba(227, 106, 118, 0.18);
@@ -409,6 +411,188 @@
 
     .app-page.hidden {
       display: none;
+    }
+
+    .descriptor-layout {
+      display: grid;
+      gap: 0.9rem;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    #descriptorInput {
+      min-height: 150px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      word-break: break-all;
+    }
+
+    .descriptor-range-row {
+      display: grid;
+      gap: 0.7rem;
+      grid-template-columns: repeat(2, minmax(0, 180px));
+      margin-top: 0.75rem;
+    }
+
+    .descriptor-range-row label {
+      margin-top: 0;
+    }
+
+    .privacy-notice {
+      margin-bottom: 0.8rem;
+      padding: 0.75rem;
+      border: 1px solid #2f6f61;
+      border-radius: 10px;
+      background: rgba(31, 94, 78, 0.16);
+      color: #bfe8dc;
+    }
+
+    #descriptorStatus {
+      min-height: 1.35rem;
+      margin-top: 0.65rem;
+      color: #9ec0df;
+    }
+
+    #descriptorStatus.error {
+      color: #f08b7f;
+    }
+
+    .descriptor-loading {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      min-height: 1.35rem;
+      margin-top: 0.65rem;
+      color: #f4b35f;
+      font-size: 0.88rem;
+    }
+
+    .descriptor-loading[hidden] {
+      display: none;
+    }
+
+    .descriptor-loading-spinner {
+      width: 1rem;
+      height: 1rem;
+      flex: 0 0 auto;
+      border: 2px solid rgba(247, 147, 26, 0.28);
+      border-top-color: #f7931a;
+      border-radius: 50%;
+      animation: descriptor-spin 700ms linear infinite;
+    }
+
+    @keyframes descriptor-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .descriptor-results-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+    }
+
+    .descriptor-results-toggle:hover,
+    .descriptor-results-toggle:focus-visible {
+      background: transparent;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .descriptor-results-toggle h2 {
+      margin: 0;
+    }
+
+    .descriptor-collapse-arrow {
+      display: inline-grid;
+      width: 2rem;
+      height: 2rem;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 1px solid #3d5064;
+      border-radius: 50%;
+      color: #f7931a;
+      font-size: 1.15rem;
+      transition: transform 160ms ease;
+    }
+
+    .descriptor-results-toggle[aria-expanded="false"] .descriptor-collapse-arrow {
+      transform: rotate(-90deg);
+    }
+
+    .descriptor-results-content {
+      display: grid;
+      gap: 0.9rem;
+      margin-top: 0.85rem;
+    }
+
+    .descriptor-address-component {
+      overflow: hidden;
+      border: 1px solid #2f3f50;
+      border-radius: 12px;
+      background: #111923;
+    }
+
+    .descriptor-address-component-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.7rem;
+      padding: 0.7rem 0.8rem;
+      border-bottom: 1px solid #2f3f50;
+      background: #17222e;
+    }
+
+    .descriptor-address-component-head h3 {
+      margin: 0;
+      color: #dceaf6;
+      font-size: 0.95rem;
+    }
+
+    .descriptor-address-component-head span {
+      color: #8da9c2;
+      font-size: 0.78rem;
+    }
+
+    .descriptor-address-scroll {
+      max-height: 260px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+    }
+
+    .descriptor-address-row {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.68rem 0.8rem;
+      border-bottom: 1px solid #263544;
+    }
+
+    .descriptor-address-row:last-child {
+      border-bottom: 0;
+    }
+
+    .descriptor-address-index {
+      color: #8da9c2;
+      font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .descriptor-address-row code {
+      overflow-wrap: anywhere;
+      color: #d7e6f4;
+    }
+
+    .descriptor-copy-button {
+      padding: 0.35rem 0.65rem;
+      font-size: 0.78rem;
     }
 
     #rawTxHexInput {
@@ -1233,9 +1417,21 @@
         padding-right: 15px;
         padding-left: 15px;
       }
+
+      .descriptor-range-row {
+        grid-template-columns: 1fr;
+      }
+
+      .descriptor-address-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      .descriptor-address-index {
+        grid-column: 1 / -1;
+      }
     }
   </style>
-  <script type="module" crossorigin src="./assets/index-D9bC7oSV.js"></script>
+  <script type="module" crossorigin src="./assets/index-BKNZcpq2.js"></script>
 </head>
 <body>
   <main class="app-shell">
@@ -1255,8 +1451,9 @@
     </header>
 
     <nav class="menu-row">
-      <button type="button" id="openBuilderPage" class="menu-button active">PSBT Builder</button>
-      <button type="button" id="openDecoderPage" class="menu-button">Raw Transaction Hex Decoder</button>
+      <button type="button" id="openBuilderPage" class="menu-button active" aria-pressed="true">PSBT Builder</button>
+      <button type="button" id="openDecoderPage" class="menu-button" aria-pressed="false">Raw Transaction Hex Decoder</button>
+      <button type="button" id="openDescriptorPage" class="menu-button" aria-pressed="false">Descriptor Addresses</button>
     </nav>
 
     <section id="builderPage" class="app-page">
@@ -1308,8 +1505,8 @@
             <div id="opReturnGroup" style="display:none;">
               <label for="opReturnMessage">OP_RETURN Message (text or 0x hex)</label>
               <input type="text" id="opReturnMessage" placeholder="Enter text message">
-              <div class="hint">Maximum 83 bytes. Hex format: 0x...</div>
-              <div id="opReturnByteStatus">0 / 83 bytes</div>
+              <div class="hint">Maximum 100,000 bytes. Payloads over 83 bytes may be non-standard. Hex format: 0x...</div>
+              <div id="opReturnByteStatus" role="status" aria-live="polite">0 / 100,000 bytes</div>
             </div>
 
             <label for="sighashType" style="margin-top:0.9rem;">Sighash Type (all inputs)</label>
@@ -1412,6 +1609,78 @@
           <section class="rawtx-summary-card">
             <h3 class="rawtx-summary-title">Outputs</h3>
             <div id="rawTxOutputSummary" class="rawtx-summary-list"></div>
+          </section>
+        </div>
+      </section>
+    </section>
+
+    <section id="descriptorPage" class="app-page hidden">
+      <section id="descriptorDerivationPanel" class="card descriptor-layout" aria-busy="false">
+        <div class="card-head">
+          <h2>Descriptor Address Derivation</h2>
+        </div>
+        <div class="privacy-notice" role="note">
+          <strong>Browser-only:</strong> descriptor validation and every receiving/change address derivation happen locally in this browser. No descriptor or derived address is sent to an external service.
+        </div>
+        <div>
+          <label for="descriptorInput">Public Multipath Descriptor</label>
+          <textarea
+            id="descriptorInput"
+            rows="6"
+            spellcheck="false"
+            autocomplete="off"
+            placeholder="wpkh([fingerprint/path]xpub.../&lt;0;1&gt;/*)#checksum"
+          ></textarea>
+          <div class="hint">
+            Enter a watch-only ranged descriptor containing /&lt;0;1&gt;/*. Branch 0 is receiving and branch 1 is change. Private keys are rejected.
+          </div>
+          <div class="descriptor-range-row">
+            <div>
+              <label for="descriptorStartIndex">Start Index</label>
+              <input id="descriptorStartIndex" type="number" min="0" max="2147483647" step="1" value="0" inputmode="numeric">
+            </div>
+            <div>
+              <label for="descriptorCount">Count</label>
+              <input id="descriptorCount" type="number" min="1" max="100" step="1" value="20" inputmode="numeric">
+            </div>
+          </div>
+          <div class="action-row">
+            <button id="deriveDescriptorButton" type="button">Derive Addresses</button>
+            <button id="clearDescriptorButton" type="button">Clear</button>
+          </div>
+          <div id="descriptorLoading" class="descriptor-loading" role="status" aria-live="polite" hidden>
+            <span class="descriptor-loading-spinner" aria-hidden="true"></span>
+            <span>Deriving addresses locally in your browser…</span>
+          </div>
+          <div id="descriptorStatus" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="descriptorResults" class="card" hidden>
+        <button
+          id="descriptorResultsToggle"
+          class="descriptor-results-toggle"
+          type="button"
+          aria-expanded="true"
+          aria-controls="descriptorResultsContent"
+        >
+          <h2>Derived Addresses</h2>
+          <span class="descriptor-collapse-arrow" aria-hidden="true">▾</span>
+        </button>
+        <div id="descriptorResultsContent" class="descriptor-results-content">
+          <section class="descriptor-address-component" aria-labelledby="receivingAddressesTitle">
+            <div class="descriptor-address-component-head">
+              <h3 id="receivingAddressesTitle">Receiving Addresses</h3>
+              <span>Branch 0</span>
+            </div>
+            <div id="receivingAddressList" class="descriptor-address-scroll"></div>
+          </section>
+          <section class="descriptor-address-component" aria-labelledby="changeAddressesTitle">
+            <div class="descriptor-address-component-head">
+              <h3 id="changeAddressesTitle">Change Addresses</h3>
+              <span>Branch 1</span>
+            </div>
+            <div id="changeAddressList" class="descriptor-address-scroll"></div>
           </section>
         </div>
       </section>
